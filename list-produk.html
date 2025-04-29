@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>List Produk - Koperasi Pelita Abadi Bersama</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    .table-scroll {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">List Produk</h1>
+      <a href="index.html" class="text-blue-600 hover:underline flex items-center space-x-2">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Kasir</span>
+      </a>
+    </div>
+
+    <!-- Search Section -->
+    <div class="border border-gray-300 rounded p-4 mb-6 bg-gray-50">
+      <div class="flex space-x-4 items-center">
+        <label for="searchType" class="font-semibold">Cari berdasarkan:</label>
+        <select id="searchType" class="border border-gray-300 rounded px-2 py-1">
+          <option value="id">ID BARANG</option>
+          <option value="name">NAMA BARANG</option>
+        </select>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Masukkan kata kunci pencarian..."
+          class="border border-gray-300 rounded px-3 py-2 flex-grow"
+        />
+      </div>
+      <div id="searchDetails" class="mt-4 p-3 bg-white border border-gray-300 rounded hidden">
+        <h2 class="font-semibold mb-2">Detail Produk</h2>
+        <p><strong>ID BARANG:</strong> <span id="detailId"></span></p>
+        <p><strong>NAMA BARANG:</strong> <span id="detailName"></span></p>
+        <p><strong>HARGA:</strong> Rp <span id="detailPrice"></span></p>
+        <p><strong>SISA PRODUK:</strong> <span id="detailStock"></span></p>
+        <p><strong>PRODUK TERJUAL:</strong> <span id="detailSold"></span></p>
+      </div>
+    </div>
+
+    <div class="table-scroll border border-gray-300 rounded">
+      <table class="min-w-full text-left text-sm">
+        <thead class="bg-yellow-400 text-white sticky top-0">
+          <tr>
+            <th class="px-3 py-2 w-8">NO</th>
+            <th class="px-3 py-2 w-24">ID BARANG</th>
+            <th class="px-3 py-2">NAMA BARANG</th>
+            <th class="px-3 py-2 w-24">HARGA</th>
+            <th class="px-3 py-2 w-24">SISA PRODUK</th>
+            <th class="px-3 py-2 w-24">PRODUK TERJUAL</th>
+          </tr>
+        </thead>
+        <tbody id="productTableBody" class="bg-white">
+          <!-- Product rows will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Sample product data - replace with actual data as needed
+    const products = [
+      { id: '22345', name: 'INDOMIE GORENG', price: 3500, stock: 100, sold: 50 },
+      { id: '22512', name: 'SHAMPO LIFEBOY', price: 12000, stock: 80, sold: 30 },
+      { id: '24141', name: 'SIKAT GIGI', price: 3500, stock: 150, sold: 70 },
+      { id: '41278', name: 'PEPSODENT', price: 4000, stock: 90, sold: 40 },
+      { id: '23124', name: 'SENDAL JEPIT', price: 10000, stock: 60, sold: 20 },
+      { id: '33125', name: 'SABUN MANDI', price: 8000, stock: 120, sold: 60 },
+      { id: '44126', name: 'MINYAK GORENG', price: 15000, stock: 70, sold: 25 },
+      { id: '55127', name: 'TEH CELUP', price: 5000, stock: 110, sold: 55 },
+      { id: '66128', name: 'GULA PASIR', price: 12000, stock: 95, sold: 45 },
+      { id: '77129', name: 'BERAS', price: 60000, stock: 50, sold: 15 }
+    ];
+
+    const productTableBody = document.getElementById('productTableBody');
+    const searchInput = document.getElementById('searchInput');
+    const searchType = document.getElementById('searchType');
+    const searchDetails = document.getElementById('searchDetails');
+    const detailId = document.getElementById('detailId');
+    const detailName = document.getElementById('detailName');
+    const detailPrice = document.getElementById('detailPrice');
+    const detailStock = document.getElementById('detailStock');
+    const detailSold = document.getElementById('detailSold');
+
+    function renderProducts(filteredProducts = products) {
+      productTableBody.innerHTML = '';
+      filteredProducts.forEach((product, index) => {
+        const tr = document.createElement('tr');
+        tr.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+        tr.innerHTML = `
+          <td class="px-3 py-1 border border-yellow-400 text-center">${index + 1}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-center">${product.id}</td>
+          <td class="px-3 py-1 border border-yellow-400">${product.name}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-right">${product.price.toLocaleString()}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-center">${product.stock}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-center">${product.sold}</td>
+        `;
+        tr.addEventListener('click', () => {
+          showProductDetails(product);
+        });
+        productTableBody.appendChild(tr);
+      });
+    }
+
+    function showProductDetails(product) {
+      detailId.textContent = product.id;
+      detailName.textContent = product.name;
+      detailPrice.textContent = product.price.toLocaleString();
+      detailStock.textContent = product.stock;
+      detailSold.textContent = product.sold;
+      searchDetails.classList.remove('hidden');
+    }
+
+    function filterProducts() {
+      const query = searchInput.value.trim().toLowerCase();
+      const type = searchType.value;
+      if (!query) {
+        renderProducts();
+        searchDetails.classList.add('hidden');
+        return;
+      }
+      const filtered = products.filter(product => {
+        if (type === 'id') {
+          return product.id.toLowerCase().includes(query);
+        } else {
+          return product.name.toLowerCase().includes(query);
+        }
+      });
+      renderProducts(filtered);
+      if (filtered.length === 1) {
+        showProductDetails(filtered[0]);
+      } else {
+        searchDetails.classList.add('hidden');
+      }
+    }
+
+    searchInput.addEventListener('input', filterProducts);
+    searchType.addEventListener('change', () => {
+      searchInput.value = '';
+      searchDetails.classList.add('hidden');
+      renderProducts();
+    });
+
+    // Initial render
+    renderProducts();
+  </script>
+</body>
+</html>
