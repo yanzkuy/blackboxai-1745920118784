@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplikasi Kasir - Koperasi Pelita Abadi Bersama</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    /* Custom scrollbar for table */
+    .table-scroll {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-6 grid grid-cols-12 gap-6">
+    <!-- Header and Transaction Info -->
+    <div class="col-span-7 border border-gray-300 rounded-lg p-4">
+      <div class="flex items-center space-x-4 mb-4">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Logo_Koperasi.svg/120px-Logo_Koperasi.svg.png" alt="Koperasi Logo" class="w-16 h-16 object-contain" />
+        <div>
+          <h1 class="text-2xl font-bold">KOPERASI</h1>
+          <p class="text-sm text-gray-600">PELITA ABADI BERSAMA</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-4 gap-4 text-sm mb-4">
+        <div>
+          <label class="font-semibold block">NO. TRANSAKSI</label>
+          <div class="bg-blue-600 text-white rounded px-2 py-1">N00002</div>
+        </div>
+        <div>
+          <label class="font-semibold block">TANGGAL</label>
+          <div class="font-semibold">28/04/2025</div>
+        </div>
+        <div>
+          <label class="font-semibold block">JAM</label>
+          <input type="time" id="timeInput" class="border border-gray-300 rounded px-2 py-1 w-full" />
+        </div>
+        <div>
+          <label class="font-semibold block">NAMA KASIR</label>
+          <input type="text" id="cashierName" placeholder="Nama Kasir" class="border border-gray-300 rounded px-2 py-1 w-full" />
+        </div>
+      </div>
+
+      <!-- ID BARANG Input -->
+      <div class="mb-4">
+        <label for="inputIdBarang" class="font-semibold block mb-1">ID BARANG</label>
+        <input type="text" id="inputIdBarang" placeholder="Masukkan ID Barang" class="border border-gray-300 rounded px-2 py-1 w-full" />
+      </div>
+
+      <!-- Items Table -->
+      <div class="table-scroll border border-yellow-400 rounded">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-yellow-400 text-white">
+            <tr>
+              <th class="px-3 py-2 w-8">NO</th>
+              <th class="px-3 py-2 w-24">ID BARANG</th>
+              <th class="px-3 py-2">NAMA BARANG</th>
+              <th class="px-3 py-2 w-24">HARGA</th>
+              <th class="px-3 py-2 w-16">QTY</th>
+              <th class="px-3 py-2 w-24">JUMLAH</th>
+              <th class="px-3 py-2 w-16">VOID</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTableBody" class="bg-white">
+            <!-- Items will be added here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Buttons and Summary -->
+    <div class="col-span-5 flex flex-col space-y-4">
+    <!-- Buttons -->
+    <div class="grid grid-cols-3 gap-2 mb-4">
+      <button id="btnHistory" class="bg-gray-200 hover:bg-gray-300 rounded py-2 font-semibold">History</button>
+      <button id="btnLaporan" class="bg-gray-200 hover:bg-gray-300 rounded py-2 font-semibold">Laporan</button>
+      <button id="btnSimpan" class="bg-gray-200 hover:bg-gray-300 rounded py-2 font-semibold">Simpan</button>
+      <button id="btnTopUp" class="bg-gray-300 hover:bg-gray-400 rounded py-2 font-semibold col-span-1">Top-Up</button>
+      <button id="btnListProduk" class="bg-gray-300 hover:bg-gray-400 rounded py-2 font-semibold col-span-1">List Produk</button>
+      <button id="btnListMember" class="bg-gray-300 hover:bg-gray-400 rounded py-2 font-semibold col-span-1">List Member</button>
+      <button id="btnBayar" class="bg-green-600 hover:bg-green-700 text-white rounded py-2 font-semibold col-span-1">Bayar</button>
+      <button id="btnOrderTersimpan" class="bg-gray-200 hover:bg-gray-300 rounded py-2 font-semibold col-span-2">Order Tersimpan</button>
+    </div>
+
+    <!-- List Produk Modal -->
+    <div id="listProdukModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6 relative">
+        <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-xl font-bold">&times;</button>
+        <h2 class="text-2xl font-bold mb-4">List Produk</h2>
+
+        <!-- Search Section -->
+        <div class="border border-gray-300 rounded p-4 mb-6 bg-gray-50">
+          <div class="flex space-x-4 items-center">
+            <label for="modalSearchType" class="font-semibold">Cari berdasarkan:</label>
+            <select id="modalSearchType" class="border border-gray-300 rounded px-2 py-1">
+              <option value="id">ID BARANG</option>
+              <option value="name">NAMA BARANG</option>
+            </select>
+            <input
+              type="text"
+              id="modalSearchInput"
+              placeholder="Masukkan kata kunci pencarian..."
+              class="border border-gray-300 rounded px-3 py-2 flex-grow"
+            />
+          </div>
+          <div id="modalSearchDetails" class="mt-4 p-3 bg-white border border-gray-300 rounded hidden">
+            <h3 class="font-semibold mb-2">Detail Produk</h3>
+            <p><strong>ID BARANG:</strong> <span id="modalDetailId"></span></p>
+            <p><strong>NAMA BARANG:</strong> <span id="modalDetailName"></span></p>
+            <p><strong>HARGA:</strong> Rp <span id="modalDetailPrice"></span></p>
+            <p><strong>SISA PRODUK:</strong> <span id="modalDetailStock"></span></p>
+            <p><strong>PRODUK TERJUAL:</strong> <span id="modalDetailSold"></span></p>
+          </div>
+        </div>
+
+        <div class="table-scroll border border-gray-300 rounded">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-yellow-400 text-white sticky top-0">
+              <tr>
+                <th class="px-3 py-2 w-8">NO</th>
+                <th class="px-3 py-2 w-24">ID BARANG</th>
+                <th class="px-3 py-2">NAMA BARANG</th>
+                <th class="px-3 py-2 w-24">HARGA</th>
+                <th class="px-3 py-2 w-24">SISA PRODUK</th>
+                <th class="px-3 py-2 w-24">PRODUK TERJUAL</th>
+              </tr>
+            </thead>
+            <tbody id="modalProductTableBody" class="bg-white">
+              <!-- Product rows will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Add/Edit Product Button -->
+        <div class="mt-4 flex justify-end">
+          <button id="btnAddEditProduct" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold">
+            Tambah / Edit Produk
+          </button>
+        </div>
+
+        <!-- Add/Edit Product Form -->
+        <form id="addEditProductForm" class="mt-4 bg-gray-50 border border-gray-300 rounded p-4 hidden">
+          <h3 class="text-lg font-bold mb-4">Tambah / Edit Produk</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="inputIdBarangForm" class="block font-semibold mb-1">ID BARANG</label>
+              <input type="text" id="inputIdBarangForm" class="border border-gray-300 rounded px-2 py-1 w-full" required />
+            </div>
+            <div>
+              <label for="inputNamaBarangForm" class="block font-semibold mb-1">NAMA BARANG</label>
+              <input type="text" id="inputNamaBarangForm" class="border border-gray-300 rounded px-2 py-1 w-full" required />
+            </div>
+            <div>
+              <label for="inputHargaForm" class="block font-semibold mb-1">HARGA</label>
+              <input type="number" id="inputHargaForm" class="border border-gray-300 rounded px-2 py-1 w-full" min="0" required />
+            </div>
+            <div>
+              <label for="inputStokForm" class="block font-semibold mb-1">STOK BARANG</label>
+              <input type="number" id="inputStokForm" class="border border-gray-300 rounded px-2 py-1 w-full" min="0" required />
+            </div>
+          </div>
+          <div class="mt-4 flex space-x-4">
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-semibold">Simpan</button>
+            <button type="button" id="btnCancelForm" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 font-semibold">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+      <!-- Summary -->
+      <div class="bg-white border border-gray-300 rounded p-4 flex flex-col space-y-4">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-yellow-400">TOTAL Rp.</span>
+          <span id="totalPrice" class="text-4xl font-extrabold">0</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="bg-yellow-300 px-2 py-1 font-semibold">ID BARANG</div>
+          <div id="summaryIdBarang" class="bg-gray-300 px-2 py-1"></div>
+          <div class="bg-yellow-300 px-2 py-1 font-semibold">NAMA BARANG</div>
+          <div id="summaryNamaBarang" class="bg-gray-300 px-2 py-1"></div>
+          <div class="bg-yellow-300 px-2 py-1 font-semibold">HARGA</div>
+          <div id="summaryHarga" class="bg-gray-300 px-2 py-1"></div>
+          <div class="bg-yellow-300 px-2 py-1 font-semibold">QTY</div>
+          <input type="number" id="summaryQty" min="1" value="1" class="bg-gray-300 px-2 py-1 w-full text-right rounded" />
+          <div class="bg-yellow-300 px-2 py-1 font-semibold">JUMLAH</div>
+          <div id="summaryJumlah" class="bg-gray-300 px-2 py-1"></div>
+        </div>
+        <div class="flex space-x-4 mt-4">
+          <button id="btnBatal" class="flex-1 bg-gray-200 hover:bg-gray-300 rounded py-2 font-semibold">Batal</button>
+          <button id="btnTambah" class="flex-1 bg-gray-300 hover:bg-gray-400 rounded py-2 font-semibold">Tambah</button>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+          <div class="bg-blue-600 text-white px-2 py-1 font-semibold">TOTAL ITEM</div>
+          <div id="totalItem" class="border border-gray-300 rounded px-2 py-1"></div>
+        </div>
+      </div>
+
+      <!-- Monitor Aktivitas -->
+      <div class="bg-white border border-gray-500 rounded p-4 h-32 overflow-y-auto text-xs font-mono" id="activityMonitor">
+        Monitor Aktivitas
+      </div>
+    </div>
+
+    <!-- Payment Type Popup -->
+    <div id="paymentPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg w-64 p-6 flex flex-col space-y-4">
+        <h2 class="text-xl font-bold text-center">Pilih Jenis Pembayaran</h2>
+        <button id="btnReguler" class="bg-yellow-400 hover:bg-yellow-500 text-white rounded py-2 font-semibold">REGULER</button>
+        <button id="btnVirtual" class="bg-blue-600 hover:bg-blue-700 text-white rounded py-2 font-semibold">VIRTUAL</button>
+        <button id="btnExitPopup" class="bg-gray-400 hover:bg-gray-500 text-white rounded py-2 font-semibold">EXIT</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Product data from user provided table
+    const products = [
+      { id: '22345', name: 'INDOMIE GORENG', price: 3500 },
+      { id: '22512', name: 'SHAMPO LIFEBOY', price: 12000 },
+      { id: '24141', name: 'SIKAT GIGI', price: 3500 },
+      { id: '41278', name: 'PEPSODENT', price: 4000 },
+      { id: '23124', name: 'SENDAL JEPIT', price: 10000 }
+    ];
+
+    let items = [];
+    let selectedItemIndex = null;
+
+    const itemsTableBody = document.getElementById('itemsTableBody');
+    const totalPriceEl = document.getElementById('totalPrice');
+    const totalItemEl = document.getElementById('totalItem');
+    const activityMonitor = document.getElementById('activityMonitor');
+
+    const summaryIdBarang = document.getElementById('summaryIdBarang');
+    const summaryNamaBarang = document.getElementById('summaryNamaBarang');
+    const summaryHarga = document.getElementById('summaryHarga');
+    const summaryQty = document.getElementById('summaryQty');
+    
+    // Update summaryJumlah when quantity input changes
+    summaryQty.addEventListener('input', () => {
+      const qty = parseInt(summaryQty.value) || 1;
+      const price = parseInt(summaryHarga.textContent.replace(/,/g, '')) || 0;
+      summaryJumlah.textContent = (qty * price).toLocaleString();
+    });
+    const summaryJumlah = document.getElementById('summaryJumlah');
+
+    const inputIdBarang = document.getElementById('inputIdBarang');
+
+    function logActivity(message) {
+      const time = new Date().toLocaleTimeString();
+      activityMonitor.textContent += `\n[${time}] ${message}`;
+      activityMonitor.scrollTop = activityMonitor.scrollHeight;
+    }
+
+    function renderItems() {
+      itemsTableBody.innerHTML = '';
+      items.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+        tr.innerHTML = `
+          <td class="px-3 py-1 border border-yellow-400 text-center">${index + 1}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-center">${item.id}</td>
+          <td class="px-3 py-1 border border-yellow-400">${item.name}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-right">${item.price.toLocaleString()}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-center">${item.qty}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-right">${(item.price * item.qty).toLocaleString()}</td>
+          <td class="px-3 py-1 border border-yellow-400 text-center">
+            <button class="text-red-600 font-bold hover:text-red-800 btn-void" data-index="${index}">Void</button>
+          </td>
+        `;
+        tr.addEventListener('click', () => {
+          selectItem(index);
+        });
+        itemsTableBody.appendChild(tr);
+      });
+      if (selectedItemIndex !== null && items[selectedItemIndex]) {
+        updateSummary(items[selectedItemIndex]);
+      } else {
+        updateSummary(null);
+      }
+      updateTotals();
+    }
+
+    function updateTotals() {
+      const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+      totalPriceEl.textContent = total.toLocaleString();
+      totalItemEl.textContent = totalQty;
+    }
+
+    function selectItem(index) {
+      selectedItemIndex = index;
+      const item = items[index];
+      updateSummary(item);
+      logActivity(`Selected item: ${item.name} (ID: ${item.id})`);
+    }
+
+    function updateSummary(item) {
+      if (item) {
+        summaryIdBarang.textContent = item.id;
+        summaryNamaBarang.textContent = item.name;
+        summaryHarga.textContent = item.price.toLocaleString();
+        summaryQty.value = item.qty;
+        summaryJumlah.textContent = (item.price * item.qty).toLocaleString();
+      } else {
+        summaryIdBarang.textContent = '';
+        summaryNamaBarang.textContent = '';
+        summaryHarga.textContent = '';
+        summaryQty.value = 1;
+        summaryJumlah.textContent = '';
+      }
+    }
+
+    // Clear summary and selection
+    function clearSelection() {
+      selectedItemIndex = null;
+      updateSummary(null);
+      logActivity('Selection cleared');
+      inputIdBarang.value = '';
+    }
+
+    // Add new item or update qty if exists
+    function addItem() {
+      const id = inputIdBarang.value.trim();
+      if (!id) {
+        alert('Masukkan ID BARANG terlebih dahulu.');
+        return;
+      }
+      const product = modalProducts.find(p => p.id === id);
+      if (!product) {
+        alert('ID BARANG tidak ditemukan.');
+        return;
+      }
+      const qty = parseInt(summaryQty.value) || 1;
+      const existingIndex = items.findIndex(i => i.id === id);
+      if (existingIndex >= 0) {
+        if (items[existingIndex].qty + qty > product.stock) {
+          alert('Stok tidak mencukupi.');
+          return;
+        }
+        items[existingIndex].qty += qty;
+        logActivity(`Increased qty of ${product.name} to ${items[existingIndex].qty}`);
+      } else {
+        if (qty > product.stock) {
+          alert('Stok tidak mencukupi.');
+          return;
+        }
+        items.push({ id: product.id, name: product.name, price: product.price, qty: qty });
+        logActivity(`Added new product ${product.name} to order`);
+      }
+      renderItems();
+      clearSelection();
+    }
+
+    // Cancel selection or last action
+    function cancelAction() {
+      clearSelection();
+    }
+
+    // Change input event to add item only on Enter key press
+    inputIdBarang.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const id = inputIdBarang.value.trim();
+        if (!id) {
+          alert('Masukkan ID BARANG terlebih dahulu.');
+          return;
+        }
+        const product = modalProducts.find(p => p.id === id);
+        if (!product) {
+          alert('ID BARANG tidak ditemukan.');
+          updateSummary(null);
+          return;
+        }
+        const qty = parseInt(summaryQty.value) || 1;
+        const existingIndex = items.findIndex(i => i.id === id);
+        if (existingIndex >= 0) {
+          if (items[existingIndex].qty + qty > product.stock) {
+            alert('Stok tidak mencukupi.');
+            return;
+          }
+          items[existingIndex].qty += qty;
+          logActivity(`Increased qty of ${product.name} to ${items[existingIndex].qty}`);
+        } else {
+          if (qty > product.stock) {
+            alert('Stok tidak mencukupi.');
+            return;
+          }
+          items.push({ id: product.id, name: product.name, price: product.price, qty: qty });
+          logActivity(`Added new product ${product.name} to order`);
+        }
+        renderItems();
+        clearSelection();
+      }
+    });
+
+    // Button event listeners
+    document.getElementById('btnTambah').addEventListener('click', () => {
+      addItem();
+    });
+
+    document.getElementById('btnBatal').addEventListener('click', () => {
+      cancelAction();
+    });
+
+    // Show payment popup on Bayar button click
+    document.getElementById('btnBayar').addEventListener('click', () => {
+      if (items.length === 0) {
+        alert('Tidak ada item untuk dibayar.');
+        return;
+      }
+      document.getElementById('paymentPopup').classList.remove('hidden');
+      document.getElementById('paymentPopup').classList.add('flex');
+    });
+
+    // Show payment popup on ENTER key press in inputIdBarang
+    document.getElementById('inputIdBarang').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (items.length === 0) {
+          alert('Tidak ada item untuk dibayar.');
+          return;
+        }
+        document.getElementById('paymentPopup').classList.remove('hidden');
+        document.getElementById('paymentPopup').classList.add('flex');
+      }
+    });
+
+    // Payment type buttons
+    document.getElementById('btnReguler').addEventListener('click', () => {
+      redirectToPayment('REGULER');
+    });
+    document.getElementById('btnVirtual').addEventListener('click', () => {
+      redirectToPayment('VIRTUAL');
+    });
+    document.getElementById('btnExitPopup').addEventListener('click', () => {
+      closePaymentPopup();
+    });
+
+    function redirectToPayment(type) {
+      const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const url = `payment.html?total=${total}&type=${type}`;
+      window.location.href = url;
+    }
+
+    function closePaymentPopup() {
+      document.getElementById('paymentPopup').classList.add('hidden');
+      document.getElementById('paymentPopup').classList.remove('flex');
+    }
+
+    // Void button event delegation
+    document.getElementById('itemsTableBody').addEventListener('click', (e) => {
+      if (e.target && e.target.classList.contains('btn-void')) {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        if (!isNaN(index)) {
+          items.splice(index, 1);
+          logActivity(`Voided item at position ${index + 1}`);
+          if (selectedItemIndex === index) {
+            clearSelection();
+          }
+          renderItems();
+        }
+      }
+    });
+
+    // Simulate List Produk button click - show product list and allow adding
+document.getElementById('btnListProduk').addEventListener('click', () => {
+  // Open modal instead of navigating
+  document.getElementById('listProdukModal').classList.remove('hidden');
+  document.getElementById('listProdukModal').classList.add('flex');
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', () => {
+  document.getElementById('listProdukModal').classList.add('hidden');
+  document.getElementById('listProdukModal').classList.remove('flex');
+});
+
+// Product data for modal
+const modalProducts = [
+  { id: '22345', name: 'INDOMIE GORENG', price: 3500, stock: 100, sold: 50 },
+  { id: '22512', name: 'SHAMPO LIFEBOY', price: 12000, stock: 80, sold: 30 },
+  { id: '24141', name: 'SIKAT GIGI', price: 3500, stock: 150, sold: 70 },
+  { id: '41278', name: 'PEPSODENT', price: 4000, stock: 90, sold: 40 },
+  { id: '23124', name: 'SENDAL JEPIT', price: 10000, stock: 60, sold: 20 },
+  { id: '33125', name: 'SABUN MANDI', price: 8000, stock: 120, sold: 60 },
+  { id: '44126', name: 'MINYAK GORENG', price: 15000, stock: 70, sold: 25 },
+  { id: '55127', name: 'TEH CELUP', price: 5000, stock: 110, sold: 55 },
+  { id: '66128', name: 'GULA PASIR', price: 12000, stock: 95, sold: 45 },
+  { id: '77129', name: 'BERAS', price: 60000, stock: 50, sold: 15 }
+];
+
+const modalProductTableBody = document.getElementById('modalProductTableBody');
+const modalSearchInput = document.getElementById('modalSearchInput');
+const modalSearchType = document.getElementById('modalSearchType');
+const modalSearchDetails = document.getElementById('modalSearchDetails');
+const modalDetailId = document.getElementById('modalDetailId');
+const modalDetailName = document.getElementById('modalDetailName');
+const modalDetailPrice = document.getElementById('modalDetailPrice');
+const modalDetailStock = document.getElementById('modalDetailStock');
+const modalDetailSold = document.getElementById('modalDetailSold');
+
+function renderModalProducts(filteredProducts = modalProducts) {
+  modalProductTableBody.innerHTML = '';
+  filteredProducts.forEach((product, index) => {
+    const tr = document.createElement('tr');
+    tr.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+    tr.innerHTML = `
+      <td class="px-3 py-1 border border-yellow-400 text-center">${index + 1}</td>
+      <td class="px-3 py-1 border border-yellow-400 text-center">${product.id}</td>
+      <td class="px-3 py-1 border border-yellow-400">${product.name}</td>
+      <td class="px-3 py-1 border border-yellow-400 text-right">${product.price.toLocaleString()}</td>
+      <td class="px-3 py-1 border border-yellow-400 text-center">${product.stock}</td>
+      <td class="px-3 py-1 border border-yellow-400 text-center">${product.sold}</td>
+    `;
+    tr.addEventListener('click', () => {
+      showModalProductDetails(product);
+    });
+    modalProductTableBody.appendChild(tr);
+  });
+}
+
+function showModalProductDetails(product) {
+  modalDetailId.textContent = product.id;
+  modalDetailName.textContent = product.name;
+  modalDetailPrice.textContent = product.price.toLocaleString();
+  modalDetailStock.textContent = product.stock;
+  modalDetailSold.textContent = product.sold;
+  modalSearchDetails.classList.remove('hidden');
+}
+
+function filterModalProducts() {
+  const query = modalSearchInput.value.trim().toLowerCase();
+  const type = modalSearchType.value;
+  if (!query) {
+    renderModalProducts();
+    modalSearchDetails.classList.add('hidden');
+    return;
+  }
+  const filtered = modalProducts.filter(product => {
+    if (type === 'id') {
+      return product.id.toLowerCase().includes(query);
+    } else {
+      return product.name.toLowerCase().includes(query);
+    }
+  });
+  renderModalProducts(filtered);
+  if (filtered.length === 1) {
+    showModalProductDetails(filtered[0]);
+  } else {
+    modalSearchDetails.classList.add('hidden');
+  }
+}
+
+modalSearchInput.addEventListener('input', filterModalProducts);
+modalSearchType.addEventListener('change', () => {
+  modalSearchInput.value = '';
+  modalSearchDetails.classList.add('hidden');
+  renderModalProducts();
+});
+
+  
+const btnAddEditProduct = document.getElementById('btnAddEditProduct');
+const addEditProductForm = document.getElementById('addEditProductForm');
+const btnCancelForm = document.getElementById('btnCancelForm');
+const inputIdBarangForm = document.getElementById('inputIdBarangForm');
+const inputNamaBarangForm = document.getElementById('inputNamaBarangForm');
+const inputHargaForm = document.getElementById('inputHargaForm');
+const inputStokForm = document.getElementById('inputStokForm');
+
+btnAddEditProduct.addEventListener('click', () => {
+  addEditProductForm.classList.remove('hidden');
+  btnAddEditProduct.classList.add('hidden');
+});
+
+btnCancelForm.addEventListener('click', () => {
+  addEditProductForm.classList.add('hidden');
+  btnAddEditProduct.classList.remove('hidden');
+  clearForm();
+});
+
+function clearForm() {
+  inputIdBarangForm.value = '';
+  inputNamaBarangForm.value = '';
+  inputHargaForm.value = '';
+  inputStokForm.value = '';
+}
+
+addEditProductForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = inputIdBarangForm.value.trim();
+  const name = inputNamaBarangForm.value.trim();
+  const price = parseInt(inputHargaForm.value);
+  const stock = parseInt(inputStokForm.value);
+
+  if (!id || !name || isNaN(price) || isNaN(stock)) {
+    alert('Mohon isi semua field dengan benar.');
+    return;
+  }
+
+  const existingIndex = modalProducts.findIndex(p => p.id === id);
+  if (existingIndex >= 0) {
+    // Update existing product stock
+    modalProducts[existingIndex].stock += stock;
+    modalProducts[existingIndex].name = name; // Update name in case it changed
+    modalProducts[existingIndex].price = price; // Update price in case it changed
+  } else {
+    // Add new product
+    modalProducts.push({ id, name, price, stock, sold: 0 });
+  }
+
+  renderModalProducts();
+  clearForm();
+  addEditProductForm.classList.add('hidden');
+  btnAddEditProduct.classList.remove('hidden');
+});
+
+// Initial render
+renderModalProducts();
+
+    // Initialize time input with current time
+    const timeInput = document.getElementById('timeInput');
+    function setCurrentTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      timeInput.value = `${hours}:${minutes}`;
+    }
+    setCurrentTime();
+
+    // Initial render
+    renderItems();
+  </script>
+</body>
+</html>
