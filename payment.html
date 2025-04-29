@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Halaman Pembayaran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 p-6 font-['Roboto',sans-serif]">
+  <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-3xl font-bold mb-6">Halaman Pembayaran</h1>
+    <div id="paymentSummary" class="text-lg space-y-4">
+      <!-- Payment details will be inserted here -->
+    </div>
+    <button id="btnBack" class="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold">Kembali ke Kasir</button>
+  </div>
+
+  <script>
+    // Parse query parameters
+    function getQueryParams() {
+      const params = {};
+      window.location.search.substring(1).split('&').forEach(pair => {
+        const [key, value] = pair.split('=');
+        params[key] = decodeURIComponent(value);
+      });
+      return params;
+    }
+
+    function formatCurrency(amount) {
+      return amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
+    }
+
+    const params = getQueryParams();
+    const total = parseFloat(params.total) || 0;
+    const paymentType = params.type || 'REGULER';
+
+    // Define discount rates
+    const discounts = {
+      REGULER: 0,
+      VIRTUAL: 0.05
+    };
+
+    const discountRate = discounts[paymentType.toUpperCase()] || 0;
+    const discountAmount = total * discountRate;
+    const finalAmount = total - discountAmount;
+
+    const paymentSummary = document.getElementById('paymentSummary');
+    paymentSummary.innerHTML = `
+      <p><strong>Total Harga:</strong> ${formatCurrency(total)}</p>
+      <p><strong>Jenis Pembayaran:</strong> ${paymentType}</p>
+      <p><strong>Diskon:</strong> ${discountRate * 100}% (${formatCurrency(discountAmount)})</p>
+      <p class="text-xl font-bold">Jumlah yang harus dibayar: ${formatCurrency(finalAmount)}</p>
+    `;
+
+    document.getElementById('btnBack').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
